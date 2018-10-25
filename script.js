@@ -1,7 +1,8 @@
 let fetch = require("node-fetch");
 let getUrls = require("get-urls");
 let globalUrl = new Set();
-
+let fs = require("fs");
+let fstream = require("fstream");
 
 async function callURL(url) {
     try {
@@ -11,13 +12,14 @@ async function callURL(url) {
         let urlsArr = [];
         urls.forEach(ele => urlsArr.push(ele));
         await Promise.all(urlsArr.map(async (indUrl) => {
-            if (RegExp("https://bbc.co.uk/news").test(indUrl) || RegExp("https://www.bbc.co.uk/news").test(indUrl)) { 
+            indUrl = indUrl.split("?")[0].split("#")[0];
+            if (RegExp("^https://.*thebraintumourcharity.*").test(indUrl)) { 
                 if (globalUrl.has(indUrl)) {
 
                 } else {
                     globalUrl.add(indUrl);
                     console.log(globalUrl.size);
-                    callURL(indUrl);                    
+                    await callURL(indUrl);                    
                 }
             }
         }));
@@ -26,12 +28,16 @@ async function callURL(url) {
 }
 
 
-
+function writeResultsToFile() {
+    let sitemap = Array.from(globalUrl).join("¬");
+    let writeStream = fstream.Writer({path:"./test.txt"});
+    writeStream.write(sitemap);
+}
 
 async function intMain() {
     console.log("running");
     let t1 = Date.now();
-    await callURL("https://www.bbc.co.uk/news");
+    await callURL("https://www.thebraintumourcharity.org/");
     /*
     for (let url of globalUrl) {
         if (globalUrl.size < 200) {
