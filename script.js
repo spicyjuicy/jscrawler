@@ -40,17 +40,6 @@ async function intMain() {
     let t1 = Date.now();
     host = "thebraintumourcharity";
     await callURL("https://www.thebraintumourcharity.org/");
-    /*
-    for (let url of globalUrl) {
-        if (globalUrl.size < 200) {
-            console.log('crawling' + url)
-            await callURL(url);
-        } else {
-            callURL(url);
-        }
-        console.log(globalUrl.size);
-    }
-    */
     let t2 = Date.now();
     console.log(globalUrl.size/(t2 - t1)*1000);
     writeResultsToFile();
