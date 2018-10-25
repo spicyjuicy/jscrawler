@@ -3,6 +3,7 @@ let getUrls = require("get-urls");
 let globalUrl = new Set();
 let fs = require("fs");
 let fstream = require("fstream");
+let host;
 
 async function callURL(url) {
     try {
@@ -13,7 +14,7 @@ async function callURL(url) {
         urls.forEach(ele => urlsArr.push(ele));
         await Promise.all(urlsArr.map(async (indUrl) => {
             indUrl = indUrl.split("?")[0].split("#")[0];
-            if (RegExp("^https://.*thebraintumourcharity.*").test(indUrl)) { 
+            if (RegExp(`^.*${host}.*`).test(indUrl)) { 
                 if (globalUrl.has(indUrl)) {
 
                 } else {
@@ -37,6 +38,7 @@ function writeResultsToFile() {
 async function intMain() {
     console.log("running");
     let t1 = Date.now();
+    host = "thebraintumourcharity";
     await callURL("https://www.thebraintumourcharity.org/");
     /*
     for (let url of globalUrl) {
