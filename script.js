@@ -1,49 +1,56 @@
 let fetch = require("node-fetch");
 let getUrls = require("get-urls");
-let globalUrl = new Set();
-let fs = require("fs");
+let globalUrl = {};
 let fstream = require("fstream");
-let host;
-
-async function callURL(url) {
-    try {
-        let response = await fetch(url);
-        let result = await response.text();
-        let urls = getUrls(result);
-        let urlsArr = [];
-        urls.forEach(ele => urlsArr.push(ele));
-        await Promise.all(urlsArr.map(async (indUrl) => {
-            indUrl = indUrl.split("?")[0].split("#")[0];
-            if (RegExp(`^.*${host}.*`).test(indUrl)) { 
-                if (globalUrl.has(indUrl)) {
-
-                } else {
-                    globalUrl.add(indUrl);
-                    console.log(globalUrl.size);
-                    await callURL(indUrl);                    
-                }
-            }
-        }));
-    } catch (error) {
-    }
-}
-
+let excludes = [".bin", ".mp4", ".svg", ".JPG", ".jpg", ".php", ".jpeg", ".png", ".bmp", ".gif", ".ttf", ".zip", ".7z", ".bz2", ".tar", ".exe", ".dll", ".pdf", ".psd", ".ico", ".css", ".js", ".aspx"];
+let t1 = Date.now();
+let counter = 0;
+let host = "https://www.bbc.co.uk/news";
+let timeToEnd = t1 + 1000*10;
 
 function writeResultsToFile() {
-    let sitemap = Array.from(globalUrl).join("¬");
+    let sitemap = Array.from(globalUrl).join("\n");
     let writeStream = fstream.Writer({path:"./test.txt"});
     writeStream.write(sitemap);
 }
 
-async function intMain() {
-    console.log("running");
-    let t1 = Date.now();
-    host = "thebraintumourcharity";
-    await callURL("https://www.thebraintumourcharity.org/");
+async function recursiveCheck() {
+    let urlsToCheck = Object.entries(globalUrl).filter(ele => !ele[1]).map(ele => ele[0]);
     let t2 = Date.now();
-    console.log(globalUrl.size/(t2 - t1)*1000);
+    if (!urlsToCheck.length || t2 > timeToEnd) {
+        return Promise.resolve("Done");
+    }
+    await Promise.all(urlsToCheck.map(async ele => {
+        console.log(ele)
+        return callURL(ele);
+    }));
+    console.log(counter + urlsToCheck.length);
+    return recursiveCheck();
+}
+
+async function callURL(url) {
+    return fetch(url).then(async res => {
+        globalUrl[url] = res.status;
+        let page = await res.text();
+        let urlsToParse = Array.from(getUrls(page));
+        let newUrls = urlsToParse.filter(ele => {
+            console.log(ele);
+            return ele.includes(host) && !excludes.some(extension => ele.includes(extension));
+        });
+        newUrls.forEach(ele => {
+            globalUrl[ele] || (globalUrl[ele] = null);
+        });
+        return Promise.resolve("Done");
+    }).catch(error => {
+        globalUrl[url] = 500;
+        return Promise.resolve("Done");
+    });
+}
+
+async function intMain() {
+    globalUrl["https://www.bosch-home.es/"] = null;
+    await recursiveCheck();
     writeResultsToFile();
 }
 
-intMain();
-
+intMain()

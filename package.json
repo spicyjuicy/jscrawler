@@ -12,6 +12,9 @@
     "crawler": "^1.2.0",
     "fstream": "^1.0.11",
     "get-urls": "^8.0.0",
-    "node-fetch": "^2.2.0"
+    "is-webview": "^1.0.1",
+    "node-fetch": "^2.2.0",
+    "readline-sync": "^1.4.9",
+    "xml-js": "^1.6.8"
   }
 }
