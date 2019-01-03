@@ -33,8 +33,11 @@ async function recursiveCheck() {
     for (let i = 0; i < splitUrls.length; i++) {
         let startTime = Date.now(),
             endTime = startTime + 1000 * maxNumberOfThreads * 1 / limitPerSecond;
-        await Promise.all(splitUrls[i].map(async ele => {
-            return callURL(ele, endTime);
+        await Promise.all(splitUrls[i].map(async (ele, i) => {
+            return (await delay(1000 / limitPerSecond * i, function (input) {
+                console.log("fetching", input);
+                return callURL(input,endTime);
+            }))(ele);
         }));
     }
     return await recursiveCheck();
@@ -73,7 +76,7 @@ async function intMain() {
         globalUrl[host] = null;
         await recursiveCheck();
         let t2 = Date.now();
-        console.log(Math.floor((t2 - t1) / 10)/10, Object.entries(globalUrl).filter(ele => ele[1] !== null).length);
+        console.log(Math.floor((t2 - t1) / 10) / 10, Object.entries(globalUrl).filter(ele => ele[1] !== null).length);
         await writeResultsToFile(JSON.stringify(globalUrl, null, 4), "crawlertest.json");
     } else {
         console.log("Stopping Function");
@@ -82,10 +85,10 @@ async function intMain() {
 
 function areYouSure() {
     let answer1 = readline.question(`Please confirm you would like to run this function against ${host} (Y/N)? `);
-    if ([`yes`,`y`].includes(answer1.toLowerCase())) {
+    if ([`yes`, `y`].includes(answer1.toLowerCase())) {
         if (maxNumberOfThreads > 5 || limitPerSecond > 10 || maxNumberOfThreads === 0 || limitPerSecond === 0) {
             let answer2 = readline.question(`You selected 1 or more high values: Max Number Of threads: ${maxNumberOfThreads}, Max Calls Per Second: ${limitPerSecond}. Are you Sure? (Y/N)? `);
-            if ([`yes`,`y`].includes(answer2.toLowerCase())) {
+            if ([`yes`, `y`].includes(answer2.toLowerCase())) {
                 return true;
             } else {
                 return false;
@@ -122,6 +125,12 @@ function getUrls(page) {
         urlSet.add(url);
     })
     return urlSet;
+}
+
+async function delay(t, v) {
+    return new Promise(function (resolve) {
+        setTimeout(resolve.bind(null, v), t)
+    });
 }
 
 intMain()

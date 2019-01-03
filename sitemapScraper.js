@@ -14,7 +14,6 @@ async function main() {
 main();
 
 async function getSitemaps(sitemap, urls = []) {
-    console.log(sitemap)
     let dom = new JSDOM("");
     let document = dom.window.document;
     let page = await (await fetch(sitemap)).text();

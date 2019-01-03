@@ -292,21 +292,15 @@ function writeResultsToFile(text, name) {
 }
 
 //filter out anything on the second level without any children
-console.log(Object.keys(sitemap["bosch-ES"]).length);
+
 Object.keys(sitemap["bosch-ES"]).forEach(ele => {
-    // if (Object.values(sitemap["bosch-ES"][ele]).length === 0) {
-    //     delete sitemap["bosch-ES"][ele];
-    // }
+
 });
-// delete sitemap["bosch-ES"]["tienda-electrodomesticos"];
-// delete sitemap["bosch-ES"]["electrodomesticos"];
-// delete sitemap["bosch-ES"]["tienda"];
-// delete sitemap["bosch-ES"]["videogaleria"];
-
-console.log(Object.keys(sitemap["bosch-ES"]).length);
 
 
-// sitemap["bosch-ES"]["catalogo-electrodomesticos"];
+
+
+
 let propList = {};
 let myString = "";
 function recurThing(prop,level,path) {
